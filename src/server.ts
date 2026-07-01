@@ -4,7 +4,7 @@ import authRoutes from "./routes/authRoutes.js"
 async function testFirebase() {
     const collection =await db.listCollections()
     console.log("firebase conected");
-    console.log(collection)
+    // console.log(collection)
 }
 testFirebase();
 const app=express();

@@ -18,6 +18,7 @@ export const createProfile=async(
         name,
         phone,
         gender,
+      role: "PASSENGER",
         walletBlance:0,
         createdAt:admin.firestore.FieldValue.serverTimestamp()
     }
