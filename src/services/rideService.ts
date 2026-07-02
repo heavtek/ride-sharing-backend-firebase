@@ -1,16 +1,34 @@
 import admin from "firebase-admin"
 import {db} from "../config/firebase"
 import { readdirSync } from "node:fs";
+import { getDistanceAndDuration } from "./MapService.js";
+import { calculateFare } from "./fareService.js";
 export const requestRideService=async(uid:string,data:any)=>{
 
 const riderRef= db.collection("rides").doc()
+const route = await getDistanceAndDuration(
+    data.pickup.lat,
+    data.pickup.lng,
+    data.destination.lat,
+    data.destination.lng
+);
 
+const estimatedFare = calculateFare(
+    route.distanceInMeters,
+    route.durationInSeconds
+);
 const ride={
     rideId:riderRef.id,
     passangerId:uid,
     pickup:data.pickup,
     destination:data.destination,
     driverId:null,
+      estimatedFare,
+
+    estimatedDistance: route.distanceInMeters,
+
+    estimatedDuration: route.durationInSeconds,
+
     status:"REQUESTED",
     createdAt:admin.firestore.FieldValue.serverTimestamp()
 }
@@ -92,7 +110,7 @@ await db.collection("drivers").doc(driverId)
 return {message:"trip has started"}
 }
 export const finishRideService= async(driverId:string,rideId:string,
-fare:number
+
 )=>{
 const rideRef=db.collection("rides").doc(rideId)
 
@@ -108,10 +126,26 @@ if(ride?.driverId !==  driverId){
 }
 if(ride?.status !== "ONGOING"){
     throw new Error ("Ride cannot be Completed")
+
 }
+ // Get route information
+  const route = await getDistanceAndDuration(
+    ride.pickup.lat,
+    ride.pickup.lng,
+    ride.destination.lat,
+    ride.destination.lng
+  );
+
+  // Calculate final fare
+  const fare = calculateFare(
+    route.distanceInMeters,
+    route.durationInSeconds
+  );
 await rideRef.update({
  status:"COMPLETED",
-   fare,
+    fare,
+    distance: route.distanceInMeters,
+    duration: route.durationInSeconds,
 
 completedAt:admin.firestore.FieldValue.serverTimestamp()
 })
@@ -123,7 +157,8 @@ await db.collection("drivers").doc(driverId)
 })
 return{
 
-message:"Ride Completed"
+message:"Ride Completed",
+  fare,
 
 };
 }

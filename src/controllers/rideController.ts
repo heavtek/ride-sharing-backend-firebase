@@ -39,9 +39,9 @@ export const finishRide=async(req:any,res:Response)=>{
 
 const driverId=req.user.uid;
 
-const {rideId,fare}=req.body;
+const {rideId}=req.body;
 
-const result=await finishRideService(driverId,rideId,fare);
+const result=await finishRideService(driverId,rideId);
 
 res.json(result);
 
