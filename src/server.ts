@@ -1,6 +1,8 @@
 import express from "express"
 import {db} from "./config/firebase.js"
 import authRoutes from "./routes/authRoutes.js"
+import driverRoutes from "./routes/driverRoutes.js"
+import rideRouter from "./routes/rideRoutes.js"
 async function testFirebase() {
     const collection =await db.listCollections()
     console.log("firebase conected");
@@ -11,6 +13,8 @@ const app=express();
 app.use(express.json())
 
 app.use("/auth",authRoutes)
+app.use("/driver",driverRoutes)
+app.use("/ride",rideRouter)
 
 
 
